@@ -1,26 +1,29 @@
 package main
 
-import "fmt"
+import "unicode/utf8"
 
 func main() {
 
-	var a int
-	var b string
-	//Присвоение в строку переменным разных типов
-	a, b = 5, "test"
+	//Строки хранятся как массив байт, он неизменяемый.
+	var a string = "abc"
 
-	fmt.Println(a, b)
+	println(len(a))
+	println(a[0])
+	// a[1] = 10 //Так нельзя
 
-	// Реализация swap и неявная типизация
-	var d, c = 5, 10
-	println(d, c)
+	a = "абц"
+	println(len(a))                    // Для хранения символов unicode нужно больше одного байта - выведет 6
+	println(a[5])                      //Нежданчик. В массиве 6 байт-элементов
+	println(utf8.RuneCountInString(a)) //А так посчитает символы, не байты - будет 3 (как и нужно)
 
-	c, d = d, c
-	println(d, c)
+	var stringFormattedVar string
 
-	a *= 2
-	fmt.Println("a:", a)
-	a++
-	fmt.Println("a:", a)
+	// следующие выражения равнозначны
+	stringFormattedVar = "Hello,\nworld!\n\n\t\t\"quote!\""
+	println(stringFormattedVar)
+	stringFormattedVar = `Hello,
+world!
 
+        "quote!"`
+	println(stringFormattedVar)
 }
