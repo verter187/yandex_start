@@ -1,29 +1,23 @@
 package main
 
-import "unicode/utf8"
+import (
+	"fmt"
+	"reflect"
+)
+
+type Name string
+type Fruit string
 
 func main() {
+	var fruit Fruit
+	var name Name
 
-	//Строки хранятся как массив байт, он неизменяемый.
-	var a string = "abc"
+	fruit = "Apple"
 
-	println(len(a))
-	println(a[0])
-	// a[1] = 10 //Так нельзя
+	// name = fruit // Ошибка типизации, хотя оба типа созданы из типа string
+	name = Name(fruit) //а так, после приведения типов, работает.
 
-	a = "абц"
-	println(len(a))                    // Для хранения символов unicode нужно больше одного байта - выведет 6
-	println(a[5])                      //Нежданчик. В массиве 6 байт-элементов
-	println(utf8.RuneCountInString(a)) //А так посчитает символы, не байты - будет 3 (как и нужно)
-
-	var stringFormattedVar string
-
-	// следующие выражения равнозначны
-	stringFormattedVar = "Hello,\nworld!\n\n\t\t\"quote!\""
-	println(stringFormattedVar)
-	stringFormattedVar = `Hello,
-world!
-
-        "quote!"`
-	println(stringFormattedVar)
+	fmt.Println(name)
+	fmt.Println(reflect.TypeOf(fruit))
+	fmt.Println(reflect.TypeOf(name))
 }
