@@ -2,48 +2,25 @@ package main
 
 import "fmt"
 
-// Реализация ENUM
-// const (
-//
-//	Black = "black"
-//	Gray  = "gray"
-//	White = "white"
-//
-// )
+type Weekday int
+
 const (
-	Black = iota
-	Gray
-	White
+	Monday Weekday = iota + 1
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
+	Sunday
 )
 
-// счётчик обнуляется
-const (
-	Yellow = iota
-	Red
-	Green = iota // это присваивание не обнулит iota
-	Blue
-)
+func NextDay(day Weekday) Weekday {
+	fmt.Println("day: ", day, "day % 7: ", day%7)
+	return (day % 7) + 1
+}
 
 func main() {
-	// fmt.Println(Black != Gray) // true
-	fmt.Println(Black, Gray, White)
-	fmt.Println(Yellow, Red, Green, Blue)
-
-	const (
-		_ = iota * 10 // обратите внимание, что можно пропускать константы
-		ten
-		twenty
-		thirty
-	)
-
-	const (
-		hello = "Hello, world!" // iota равна 0
-		one   = 1               // iota равна 1
-
-		black = iota // iota равна 2
-		gray
-	)
-
-	fmt.Println(ten, twenty, thirty)
-	fmt.Println(hello, one, black, gray)
+	var today Weekday = Saturday
+	tomorrow := NextDay(today)
+	fmt.Println("today =", today, "tomorrow =", tomorrow)
 }
