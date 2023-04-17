@@ -1,63 +1,111 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
-// Моя реализация copy
-func myCopy(receiver []int, origin []int) {
-	for i := range receiver {
-		fmt.Println(i)
-		if i >= len(origin) {
-			receiver[i] = 0
-		} else {
-			receiver[i] = origin[i]
+func find(arr []int, k int) []int {
+	// Создадим пустую map
+	m := make(map[int]int)
+	// будем складывать в неё индексы массива, а в качестве ключей использовать само значение
+	for i, a := range arr {
+		if j, ok := m[k-a]; ok { // если значение k-a уже есть в массиве, значит, arr[j] + arr[i] = k и мы нашли, то что нужно
+			return []int{i, j}
+		}
+		// если искомого значения нет, то добавляем текущий индекс и значение в map
+		m[a] = i
+	}
+	// не нашли пары подходящих чисел
+	return nil
+}
+
+// как можно заметить, алгоритм пройдётся по массиву всего один раз
+// если бы мы искали подходящее значение каждый раз через перебор массива, то пришлось бы сделать гораздо больше вычислений
+func main() {
+	m := make(map[string]string)
+	m["foo"] = "bar"
+	m["ping"] = "pong"
+	fmt.Println(m)
+	fmt.Println(m["foo"])
+	delete(m, "ping")
+	fmt.Println(m["ping"])
+	fmt.Println(reflect.TypeOf(m["777"])) //Если ключ не найден, то возвращается пустое значение с типом, указанным для value
+	v, ok := m["ping"]
+	fmt.Println(v, ok)
+	m1 := make(map[int]int)
+	m1[1] = 1
+	m1[2] = 2
+	fmt.Println(m1)
+	fmt.Println(m1[1])
+	m1[2]++
+	fmt.Println(m1[2])
+	fmt.Println(m1[3]) //Если ключ не найден, то возвращается пустое значение с типом, указанным для value
+
+	// Для ключей должны быть определены операторы == и !=, поэтому ключ не может быть функцией, хеш-таблицей или слайсом.
+
+	// Получить адрес элемента map не получится. Это связано с тем, что при
+	// добавлении новых элементов в мапу может произойти перемещение в памяти
+	// уже существующих элементов. Указатели на эти элементы станут недействительными.
+	// Поэтому такая операция запрещена.
+	// addr := &m[k] //cannot take the address of m[k]
+
+	var m2 map[int]int
+	m3 := map[int]int{1: 10, 2: 20, 3: 30}
+	fmt.Println(len(m2), len(m3))
+
+	var m4 map[string]string
+	if m4 != nil { // если не проверить это условие,
+		m4["foo"] = "bar" // то здесь можно получить panic
+	}
+
+	m5 := make(map[string]string)
+	m5["foo"] = "bar"
+	m5["bazz"] = "yup"
+	for k, v := range m5 {
+		// k будет перебирать ключи,
+		// v — соответствующие этим ключам значения
+		fmt.Printf("Ключ %v, имеет значение %v \n", k, v)
+
+		//  v = "here key "+k //Так работать не будет
+		//Нужно так
+		m5[k] = "here key " + k
+	}
+	fmt.Println(m5)
+	// Go позволяет добавлять и удалять значения в map прямо внутри цикла, в процессе итерации.
+	// Удалённые ключи гарантированно не попадут в последующие итерации.
+	// С добавленными ключами таких гарантий нет. Новый ключ может попасть в последующие итерации, а может и не попасть.
+	// Такой вариант возможен, но считается плохой практикой:
+	for k, _ := range m { // обратите внимание на подчёркивание _
+		delete(m, k)
+	}
+
+	products := make(map[string]int)
+	products["хлеб"] = 50
+	products["молоко"] = 100
+	products["масло"] = 200
+	products["колбаса"] = 500
+	products["соль"] = 20
+	products["огурцы"] = 200
+	products["сыр"] = 600
+	products["ветчина"] = 700
+	products["буженина"] = 900
+	products["помидоры"] = 250
+	products["рыба"] = 300
+	products["хамон"] = 1500
+
+	for k, v := range products {
+		if v > 500 {
+			fmt.Println(k)
 		}
 	}
-}
 
-func pyrange(start, end, step int) []int {
-	// TODO: Error checking to make sure parameters are all valid,
-	// else you could get divide by zero in make and other errors.
-
-	rtn := make([]int, 0, (end-start)/step)
-	for i := start; i < end; i += step {
-		rtn = append(rtn, i)
+	order := []string{"хлеб", "буженина", "сыр", "огурцы"}
+	total := 0
+	for _, v := range order {
+		total += products[v]
 	}
-	return rtn
-}
-func main() {
-	var dest []int
-	dest2, dest3 := make([]int, 3), make([]int, 5)
-	src := []int{1, 2, 3, 4}
 
-	myCopy(dest, src)
-	myCopy(dest2, src)
-	myCopy(dest3, src)
-	fmt.Println("2", dest, dest2, dest3, src) // [] [1 2 3] [1 2 3 4 0] [1 2 3 4]
-
-	// Удаление последнего элемента слайса:
-	s := []int{1, 2, 3}
-	if len(s) != 0 { // защищаемся от паники
-		s = s[:len(s)-1]
-	}
-	fmt.Println(s)
-
-	// Удаление первого элемента слайса:
-	s1 := []int{1, 2, 3}
-	if len(s1) != 0 { // защищаемся от паники
-		s1 = s1[1:]
-	}
-	fmt.Println(s1)
-
-	// Удаление элемента слайса с индексом i:
-	s3 := []int{1, 2, 3, 4, 5}
-	i := 2
-	if len(s3) != 0 && i < len(s3) { // защищаемся от паники
-		s3 = append(s3[:i], s3[i+1:]...)
-	}
-	fmt.Println(s3)
-
-	ms1 := pyrange(1, 101, 1)
-	ms1 = append(ms1[:10], ms1[90:]...)
-	fmt.Println(ms1)
+	fmt.Println(total)
 
 }
