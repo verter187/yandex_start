@@ -2,110 +2,38 @@ package main
 
 import (
 	"fmt"
-	"reflect"
+	"time"
 )
 
-func find(arr []int, k int) []int {
-	// Создадим пустую map
-	m := make(map[int]int)
-	// будем складывать в неё индексы массива, а в качестве ключей использовать само значение
-	for i, a := range arr {
-		if j, ok := m[k-a]; ok { // если значение k-a уже есть в массиве, значит, arr[j] + arr[i] = k и мы нашли, то что нужно
-			return []int{i, j}
-		}
-		// если искомого значения нет, то добавляем текущий индекс и значение в map
-		m[a] = i
+// Аналог конструктора для создания персоны
+func NewPerson(name, email string, dobYear, dobMonth, dobDay int) Person {
+	return Person{
+		Name:        name,
+		Email:       email,
+		dateOfBirth: time.Date(dobYear, time.Month(dobMonth), dobDay, 0, 0, 0, 0, time.UTC),
 	}
-	// не нашли пары подходящих чисел
-	return nil
 }
 
-// как можно заметить, алгоритм пройдётся по массиву всего один раз
-// если бы мы искали подходящее значение каждый раз через перебор массива, то пришлось бы сделать гораздо больше вычислений
+type Person struct {
+	Name        string
+	Email       string
+	dateOfBirth time.Time
+}
+
 func main() {
-	m := make(map[string]string)
-	m["foo"] = "bar"
-	m["ping"] = "pong"
-	fmt.Println(m)
-	fmt.Println(m["foo"])
-	delete(m, "ping")
-	fmt.Println(m["ping"])
-	fmt.Println(reflect.TypeOf(m["777"])) //Если ключ не найден, то возвращается пустое значение с типом, указанным для value
-	v, ok := m["ping"]
-	fmt.Println(v, ok)
-	m1 := make(map[int]int)
-	m1[1] = 1
-	m1[2] = 2
-	fmt.Println(m1)
-	fmt.Println(m1[1])
-	m1[2]++
-	fmt.Println(m1[2])
-	fmt.Println(m1[3]) //Если ключ не найден, то возвращается пустое значение с типом, указанным для value
-
-	// Для ключей должны быть определены операторы == и !=, поэтому ключ не может быть функцией, хеш-таблицей или слайсом.
-
-	// Получить адрес элемента map не получится. Это связано с тем, что при
-	// добавлении новых элементов в мапу может произойти перемещение в памяти
-	// уже существующих элементов. Указатели на эти элементы станут недействительными.
-	// Поэтому такая операция запрещена.
-	// addr := &m[k] //cannot take the address of m[k]
-
-	var m2 map[int]int
-	m3 := map[int]int{1: 10, 2: 20, 3: 30}
-	fmt.Println(len(m2), len(m3))
-
-	var m4 map[string]string
-	if m4 != nil { // если не проверить это условие,
-		m4["foo"] = "bar" // то здесь можно получить panic
+	man := Person{
+		Name:        "John",
+		Email:       "John@example.com",
+		dateOfBirth: time.Now(),
 	}
+	fmt.Printf("Man %#v", man)
+	fmt.Println(man.Name)
+	fmt.Println(man.Email)
+	fmt.Println(man.dateOfBirth)
 
-	m5 := make(map[string]string)
-	m5["foo"] = "bar"
-	m5["bazz"] = "yup"
-	for k, v := range m5 {
-		// k будет перебирать ключи,
-		// v — соответствующие этим ключам значения
-		fmt.Printf("Ключ %v, имеет значение %v \n", k, v)
-
-		//  v = "here key "+k //Так работать не будет
-		//Нужно так
-		m5[k] = "here key " + k
+	// У каждого поля структуры может быть набор аннотаций, которые называются тегами (tags):
+	type GetUserRequest struct {
+		UserId    string `json:"user_id" yaml: "user_id" format:"uuid" example:"2e263a90-b74b-11eb-8529-0242ac130003"`
+		IsDeleted *bool  `json:"is_deleted,omitempty" yaml:"is_deleted"`
 	}
-	fmt.Println(m5)
-	// Go позволяет добавлять и удалять значения в map прямо внутри цикла, в процессе итерации.
-	// Удалённые ключи гарантированно не попадут в последующие итерации.
-	// С добавленными ключами таких гарантий нет. Новый ключ может попасть в последующие итерации, а может и не попасть.
-	// Такой вариант возможен, но считается плохой практикой:
-	for k, _ := range m { // обратите внимание на подчёркивание _
-		delete(m, k)
-	}
-
-	products := make(map[string]int)
-	products["хлеб"] = 50
-	products["молоко"] = 100
-	products["масло"] = 200
-	products["колбаса"] = 500
-	products["соль"] = 20
-	products["огурцы"] = 200
-	products["сыр"] = 600
-	products["ветчина"] = 700
-	products["буженина"] = 900
-	products["помидоры"] = 250
-	products["рыба"] = 300
-	products["хамон"] = 1500
-
-	for k, v := range products {
-		if v > 500 {
-			fmt.Println(k)
-		}
-	}
-
-	order := []string{"хлеб", "буженина", "сыр", "огурцы"}
-	total := 0
-	for _, v := range order {
-		total += products[v]
-	}
-
-	fmt.Println(total)
-
 }
