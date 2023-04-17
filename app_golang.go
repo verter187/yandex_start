@@ -1,100 +1,70 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"time"
+	"os"
+	"path/filepath"
 )
 
-type (
-	Person struct {
-		Name        string    `json:"Имя"`
-		Email       string    `json:"Почта"`
-		DateOfBirth time.Time `json:"-"` // - означает, что это поле не будет сериализовано
+func PrintAllFiles(path string) {
+	// получаем список всех элементов в папке (и файлов, и директорий)
+	files, err := os.ReadDir(path)
+	if err != nil {
+		fmt.Println("unable to get list of files", err)
+		return
 	}
-
-	Header struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
+	//  проходим по списку
+	for _, f := range files {
+		// получаем имя элемента
+		// filepath.Join — функция, которая собирает путь к элементу с разделителями
+		filename := filepath.Join(path, f.Name())
+		// печатаем имя элемента
+		fmt.Println(filename)
+		// если элемент — директория, то вызываем для него рекурсивно ту же функцию
+		if f.IsDir() {
+			PrintAllFiles(filename)
+		}
 	}
-
-	Attributes struct {
-		Email      string `json:"email"`
-		ArticleIds []int  `json:"article_ids"`
+}
+func Sum(x ...int) (res int) {
+	for _, v := range x {
+		res += v
 	}
-
-	Data struct {
-		Type       string `json:"type"`
-		Id         int    `json:"id"`
-		Attributes Attributes
-	}
-
-	Response struct {
-		Header Header `json:"header"`
-		Data   []Data `json:"data"`
-	}
-)
-
-func ReadResponse(rawResp string) (Response, error) {
-	byt := []byte(rawResp)
-	rs := Response{}
-	error := json.Unmarshal(byt, &rs)
-
-	return rs, error
+	return
 }
 
-func main() {
-	// man := &Person{
-	// 	Name:  "Aлекс",
-	// 	Email: "alex@yandex.ru",
-	// }
-	// jsMan, err := json.Marshal(man)
-	// if err != nil {
-	// 	log.Fatalln("unable marshal to json")
-	// }
-	// fmt.Printf("Man %v", string(jsMan)) // Man {"Имя":"Alex","Почта":"alex@yandex.ru"}
-	// fmt.Println()
-
-	// // Анонимные структуры
-	// req := struct {
-	// 	NameContains string `json:"name_contains"`
-	// 	Offset       int    `json:"offset"`
-	// 	Limit        int    `json: "limit"`
-	// }{
-	// 	NameContains: "Ivan",
-	// 	Limit:        50,
-	// }
-	// reqRaw, _ := json.Marshal(req)
-	// fmt.Println(string(reqRaw))
-
-	// // Размер struct{} равен 0, при этом объект c имеет адрес. Такую лазейку
-	// // можно использовать для оптимизации кода по памяти, а в дальнейшем разберём это на практике.
-	// // var c struct{}
-	// // или
-	// c := struct{}{}
-
-	// fmt.Println(unsafe.Sizeof(c))
-	// fmt.Println(unsafe.Pointer(&c))
-
-	rawResp := `{
-    "header": {
-        "code": 0,
-        "message": ""
-    },
-    "data": [{
-        "type": "user",
-        "id": 100,
-        "attributes": {
-            "email": "bob@yandex.ru",
-            "article_ids": [10, 11, 12]
-        }
-    }]
-} `
-
-	resp, err := ReadResponse(rawResp)
-	if err != nil {
-		panic(err)
+func Index(st string, a rune) (index int, ok bool) {
+	for i, c := range st {
+		if c == a {
+			return i, true
+		}
 	}
-	fmt.Println(resp.Data[0].Attributes.ArticleIds[1])
+	return
+}
 
+func fact(n int) int {
+	if n == 0 { // терминальная ветка — то есть условие выхода из рекурсии
+		return 1
+	} else { // рекурсивная ветка
+		return n * fact(n-1)
+	}
+}
+
+func Fib(n int) int {
+	switch {
+	case n <= 1: // терминальная ветка
+		return n
+	default: // рекурсивная ветка
+		return Fib(n-1) + Fib(n-2)
+	}
+}
+func main() {
+	sum := Sum(2, 3, 5, 1, 2, 57)
+	fmt.Println(sum)
+
+	i, ok := Index("testing", 'e')
+	println(i, ok)
+
+	fmt.Println(fact(5))
+	PrintAllFiles(".")
 }
