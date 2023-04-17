@@ -2,36 +2,37 @@ package main
 
 import "fmt"
 
-func Say(animal string) (v string) {
-	switch animal {
-	default:
-		v = "heh"
-	case "dog":
-		v = "gav"
-	case "cat":
-		v = "myau"
-	case "cow":
-		v = "mu"
+func Generate(seed int) func() {
+	return func() {
+		fmt.Println(seed) // замыкание получает внешнюю переменную seed
+		seed += 2         // переменная модифицируется
 	}
-	return
+
 }
 
-func Do(say bool) func(string) string {
-	if say {
-		return Say
+func fib() func() int {
+	x1, x2 := 0, 1
+	// возвращаемая функция замыкает x1, x2
+	return func() int {
+		x1, x2 = x2, x1+x2
+		return x1
 	}
-	return func(s string) string { return s }
-}
-
-func Print(who string, how func(string) string) {
-	fmt.Println(how(who))
 }
 
 func main() {
-	Print("cat", Say)
+	iterator := Generate(0)
+	iterator()
+	iterator()
+	iterator()
+	iterator()
+	iterator()
 
-	f := func(s string) string { return s }
-	fmt.Println(f("mmmmmmm"))
-
-	Print("dog", Do(true))
+	f := fib()       // получили функцию-замыкание. f() — захватила x1, x2. x1 = 0, x2 = 1
+	fmt.Println(f()) // x1 = 1, x2 = 1
+	fmt.Println(f()) // x1 = 1, x2 = 1
+	fmt.Println(f()) // x1 = 1, x2 = 2
+	fmt.Println(f()) // x1 = 2, x2 = 3
+	fmt.Println(f()) // x1 = 3, x2 = 5
+	fmt.Println(f()) // x1 = 5, x2 = 8
+	fmt.Println(f()) // x1 = 8, x2 = 13
 }
