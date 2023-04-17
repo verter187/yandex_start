@@ -2,20 +2,36 @@ package main
 
 import "fmt"
 
-func sumn(n uint) uint {
-	fmt.Println(n)
-	if n <= 0 { // Забавно, если поставить n < 0, тогда функция уйдет в бесконечную рекурсию,
-		//так как число с типом uint не может быть отрицательным, то после вычитания из нуля еденицы, число станет самым большим
-		//значением для int64 (на моей системе int будет int64) - то есть, 2^64.
-		return 0
-	} else { // рекурсивная ветка
-		return n + sumn(n-1)
+func Say(animal string) (v string) {
+	switch animal {
+	default:
+		v = "heh"
+	case "dog":
+		v = "gav"
+	case "cat":
+		v = "myau"
+	case "cow":
+		v = "mu"
 	}
+	return
+}
+
+func Do(say bool) func(string) string {
+	if say {
+		return Say
+	}
+	return func(s string) string { return s }
+}
+
+func Print(who string, how func(string) string) {
+	fmt.Println(how(who))
 }
 
 func main() {
-	fmt.Println(sumn(0))
-	var a uint = 0
-	b := a - 1
-	fmt.Println(b)
+	Print("cat", Say)
+
+	f := func(s string) string { return s }
+	fmt.Println(f("mmmmmmm"))
+
+	Print("dog", Do(true))
 }
