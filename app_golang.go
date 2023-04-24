@@ -1,52 +1,44 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
-// CircularBuffer реализует структуру данных «кольцевой буфер» для значений float64.
-type CircularBuffer struct {
-	values  []float64 // текущие значения буфера
-	headIdx int       // индекс головы (первый непустой элемент)
-	tailIdx int       // индекс хвоста (первый пустой элемент)
+type Stopwatch struct {
+	startTime time.Time
+	splits    []time.Time
 }
 
-// GetCurrentSize возвращает текущую длину буфера.
-func (b CircularBuffer) GetCurrentSize() int {
-	if b.tailIdx < b.headIdx {
-		return b.tailIdx + cap(b.values) - b.headIdx
-	}
-
-	return b.tailIdx - b.headIdx
+func (sw *Stopwatch) Start() {
+	sw.startTime = time.Now()
+	sw.splits = nil
 }
 
-// GetValues возвращает слайс текущих значений буфера, сохраняя порядок записи.
-func (b CircularBuffer) GetValues() (retValues []float64) {
-	for i := b.headIdx; i != b.tailIdx; i = (i + 1) % cap(b.values) {
-		retValues = append(retValues, b.values[i])
+func (sw *Stopwatch) SaveSplit() {
+	sw.splits = append(sw.splits, time.Now())
+}
+
+func (sw Stopwatch) GetResults() (retResults []time.Duration) {
+	for _, splitTime := range sw.splits {
+		retResults = append(retResults, splitTime.Sub(sw.startTime))
 	}
 
 	return
 }
 
-// AddValue добавляет новое значение в буфер.
-func (b *CircularBuffer) AddValue(v float64) {
-	b.values[b.tailIdx] = v
-	b.tailIdx = (b.tailIdx + 1) % cap(b.values)
-	if b.tailIdx == b.headIdx {
-		b.headIdx = (b.headIdx + 1) % cap(b.values)
-	}
-}
-
-// NewCircularBuffer — конструктор типа CircularBuffer.
-func NewCircularBuffer(size int) CircularBuffer {
-	return CircularBuffer{values: make([]float64, size+1)}
-}
-
 func main() {
-	buf := NewCircularBuffer(4)
-	for i := 0; i < 6; i++ {
-		if i > 0 {
-			buf.AddValue(float64(i))
-		}
-		fmt.Printf("[%d]: %v\n", buf.GetCurrentSize(), buf.GetValues())
-	}
+	sw := Stopwatch{}
+	sw.Start()
+
+	time.Sleep(1 * time.Second)
+	sw.SaveSplit()
+
+	time.Sleep(500 * time.Millisecond)
+	sw.SaveSplit()
+
+	time.Sleep(300 * time.Millisecond)
+	sw.SaveSplit()
+
+	fmt.Println(sw.GetResults())
 }
