@@ -1,44 +1,71 @@
 package main
 
-import (
-	"fmt"
-	"time"
-)
+import "fmt"
 
-type Stopwatch struct {
-	startTime time.Time
-	splits    []time.Time
+// Person — структура, описывающая человека.
+type Person struct {
+	Name string
+	Year int
 }
 
-func (sw *Stopwatch) Start() {
-	sw.startTime = time.Now()
-	sw.splits = nil
-}
-
-func (sw *Stopwatch) SaveSplit() {
-	sw.splits = append(sw.splits, time.Now())
-}
-
-func (sw Stopwatch) GetResults() (retResults []time.Duration) {
-	for _, splitTime := range sw.splits {
-		retResults = append(retResults, splitTime.Sub(sw.startTime))
+// NewPerson возвращает новую структуру Person.
+func NewPerson(name string, year int) Person {
+	return Person{
+		Name: name,
+		Year: year,
 	}
+}
 
-	return
+// String возвращает информацию о человеке.
+func (p Person) String() string {
+	return fmt.Sprintf("Имя: %s, Год рождения: %d", p.Name, p.Year)
+}
+
+// Print выводит информацию о человеке.
+func (p Person) Print() {
+	// вызовется метод String() для Person
+	fmt.Println(p)
+}
+
+// Student описывает студента с использованием вложенной структуры Person. То есть структура Student описывает.
+type Student struct {
+	Person // вложенный объект Person
+	Group  string
+}
+
+func NewStudent(name string, year int, group string) Student {
+	return Student{
+		Person: NewPerson(name, year), // Явно создаём структуру Person
+		Group:  group,
+	}
+}
+
+func (s Student) String() string {
+	return fmt.Sprintf("%s, Группа: %s", s.Person, s.Group)
+}
+
+func (s *Student) Debug() {
+	// доступ к методам объекта Person
+	s.Print()
+	// или
+	s.Person.Print()
+
+	// доступ к полю 'Name' объекта Person
+	s.Name = "Mark Smith"
+	// или
+	s.Person.Name = "Mark Smith"
+
+	// вызовется метод String объекта Student
+	fmt.Println(s)
+	// вызовется метод String объекта Person
+	fmt.Println(s.Person)
 }
 
 func main() {
-	sw := Stopwatch{}
-	sw.Start()
-
-	time.Sleep(1 * time.Second)
-	sw.SaveSplit()
-
-	time.Sleep(500 * time.Millisecond)
-	sw.SaveSplit()
-
-	time.Sleep(300 * time.Millisecond)
-	sw.SaveSplit()
-
-	fmt.Println(sw.GetResults())
+	s := NewStudent("John Doe", 1980, "701")
+	s.Debug()
+	// s.Print()
+	// // вызовется метод String() для Student
+	// fmt.Println(s)
+	// fmt.Println(s.Name, s.Year, s.Group)
 }
