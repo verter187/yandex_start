@@ -2,50 +2,51 @@ package main
 
 import "fmt"
 
-type MyType int
-
-func (m MyType) String() string {
-	return fmt.Sprintf("MyType: %d", m)
+// CircularBuffer реализует структуру данных «кольцевой буфер» для значений float64.
+type CircularBuffer struct {
+	values  []float64 // текущие значения буфера
+	headIdx int       // индекс головы (первый непустой элемент)
+	tailIdx int       // индекс хвоста (первый пустой элемент)
 }
 
-type DeliveryState string
+// GetCurrentSize возвращает текущую длину буфера.
+func (b CircularBuffer) GetCurrentSize() int {
+	if b.tailIdx < b.headIdx {
+		return b.tailIdx + cap(b.values) - b.headIdx
+	}
 
-const (
-	DeliveryStatePending   DeliveryState = "pending"      // сообщение отправлено
-	DeliveryStateAck       DeliveryState = "acknowledged" // сообщение получено
-	DeliveryStateProcessed DeliveryState = "processed"    // сообщение обработано успешно
-	DeliveryStateCanceled  DeliveryState = "canceled"     // обработка сообщения прервана
+	return b.tailIdx - b.headIdx
+}
 
-)
+// GetValues возвращает слайс текущих значений буфера, сохраняя порядок записи.
+func (b CircularBuffer) GetValues() (retValues []float64) {
+	for i := b.headIdx; i != b.tailIdx; i = (i + 1) % cap(b.values) {
+		retValues = append(retValues, b.values[i])
+	}
 
-func (s DeliveryState) IsValid() bool {
-	switch s {
-	case DeliveryStatePending, DeliveryStateAck, DeliveryStateProcessed, DeliveryStateCanceled:
-		return true
-	default:
-		return false
+	return
+}
+
+// AddValue добавляет новое значение в буфер.
+func (b *CircularBuffer) AddValue(v float64) {
+	b.values[b.tailIdx] = v
+	b.tailIdx = (b.tailIdx + 1) % cap(b.values)
+	if b.tailIdx == b.headIdx {
+		b.headIdx = (b.headIdx + 1) % cap(b.values)
 	}
 }
 
-func (s DeliveryState) String() string {
-	return string(s)
-}
-
-func HandleMsgDeliveryStatus(status DeliveryState) error {
-	if !status.IsValid() {
-		return fmt.Errorf("status: invalid")
-	}
-	return nil
+// NewCircularBuffer — конструктор типа CircularBuffer.
+func NewCircularBuffer(size int) CircularBuffer {
+	return CircularBuffer{values: make([]float64, size+1)}
 }
 
 func main() {
-	var m MyType = 5
-
-	s := m.String()
-	fmt.Println(s)
-
-	// приводим строку "fake" к типу DeliveryState
-	if err := HandleMsgDeliveryStatus(DeliveryState("fake")); err != nil {
-		panic(err)
+	buf := NewCircularBuffer(4)
+	for i := 0; i < 6; i++ {
+		if i > 0 {
+			buf.AddValue(float64(i))
+		}
+		fmt.Printf("[%d]: %v\n", buf.GetCurrentSize(), buf.GetValues())
 	}
 }
