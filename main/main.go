@@ -1,19 +1,21 @@
 package main
 
 import (
-	"company"
-	"person"
-	"robot"
+	"fmt"
+	"randbyte"
+	"time"
 )
 
 func main() {
-	pers := person.Person{}
-	comp := company.Company{}
 
-	comp.Hire(pers) // мы передаём переменную типа Person в функцию, аргументом которой является переменная Worker!
+	// создаём генератор случайных чисел
+	generator := randbyte.New(time.Now().UnixNano()) // в качестве затравки передаём ему текущее время, и при каждом запуске оно будет разным.
 
-	robo := &robot.Robot{}
+	buf := make([]byte, 16)
 
-	comp.Hire(robo)
-	comp.Print()
+	for i := 0; i < 5; i++ {
+		n, _ := generator.Read(buf) // единственный доступный метод, но он нам и нужен.
+		fmt.Printf("Generate bytes: %v size(%d)\n", buf, n)
+	}
+
 }
